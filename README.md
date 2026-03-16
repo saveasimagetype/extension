@@ -46,6 +46,7 @@ All image conversion happens **100% locally** in your browser. No data is collec
 |---|---|
 | `contextMenus` | Adds the right-click menu options |
 | `downloads` | Opens the browser save dialog |
+| `host_permissions: <all_urls>` | Allows fetching images from any website for conversion |
 
 ## License
 
