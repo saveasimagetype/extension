@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5"/>
+      <stop offset="100%" style="stop-color:#7C3AED"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="800" fill="url(#bg)"/>
+
+  <!-- Title -->
+  <text x="640" y="200" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="72" font-weight="700" fill="white">Save As Image Type</text>
+
+  <!-- Subtitle -->
+  <text x="640" y="270" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="32" fill="rgba(255,255,255,0.85)">Right-click any image. Save as any format.</text>
+
+  <!-- Format badges -->
+  <rect x="240" y="360" width="140" height="60" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="310" y="398" text-anchor="middle" font-family="system-ui, monospace" font-size="28" font-weight="600" fill="white">PNG</text>
+
+  <rect x="420" y="360" width="140" height="60" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="490" y="398" text-anchor="middle" font-family="system-ui, monospace" font-size="28" font-weight="600" fill="white">JPEG</text>
+
+  <rect x="600" y="360" width="140" height="60" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="670" y="398" text-anchor="middle" font-family="system-ui, monospace" font-size="28" font-weight="600" fill="white">WebP</text>
+
+  <rect x="780" y="360" width="140" height="60" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="850" y="398" text-anchor="middle" font-family="system-ui, monospace" font-size="28" font-weight="600" fill="white">BMP</text>
+
+  <rect x="960" y="360" width="140" height="60" rx="12" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+  <text x="1030" y="398" text-anchor="middle" font-family="system-ui, monospace" font-size="28" font-weight="600" fill="white">GIF</text>
+
+  <!-- Features -->
+  <text x="640" y="520" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">✓ Works with WebP, AVIF, SVG and all image types</text>
+  <text x="640" y="570" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">✓ 100% local — no data leaves your browser</text>
+  <text x="640" y="620" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">✓ Lightweight — no bloat, no popups</text>
+  <text x="640" y="670" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="24" fill="rgba(255,255,255,0.8)">✓ Preserves original filename</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="20" fill="url(#bg)"/>
+  <!-- Image icon -->
+  <rect x="24" y="32" width="80" height="60" rx="8" fill="none" stroke="white" stroke-width="5"/>
+  <!-- Mountain -->
+  <polygon points="24,84 52,58 72,78 84,66 104,84" fill="white" opacity="0.9"/>
+  <!-- Sun -->
+  <circle cx="82" cy="50" r="10" fill="white" opacity="0.9"/>
+  <!-- Arrow -->
+  <polygon points="64,88 50,100 58,100 58,114 70,114 70,100 78,100" fill="white"/>
+</svg>

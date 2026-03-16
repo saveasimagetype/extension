@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Save As Image Type",
+  "version": "1.0.0",
+  "description": "Right-click any image to save it as PNG, JPEG, WebP, BMP, or GIF. Works with all image formats including WebP and AVIF.",
+  "permissions": ["contextMenus", "downloads", "activeTab"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "minimum_chrome_version": "102"
+}
