@@ -30,26 +30,51 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!format) return;
 
   try {
-    // Fetch the image in the background script to avoid CORS issues
+    // Fetch image in background (no CORS restrictions here)
     const response = await fetch(info.srcUrl);
     const blob = await response.blob();
-    const arrayBuffer = await blob.arrayBuffer();
-    const bytes = Array.from(new Uint8Array(arrayBuffer));
 
-    const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      args: [bytes, format.mimeType, format.ext, format.id],
-      func: convertImageFromBytes,
-    });
+    // Decode image using createImageBitmap (available in service workers)
+    const bitmap = await createImageBitmap(blob);
 
-    if (results?.[0]?.result?.error) {
-      console.error("Conversion error:", results[0].result.error);
-      return;
+    // Use OffscreenCanvas (available in service workers, no DOM needed)
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const ctx = canvas.getContext("2d");
+
+    // Formats that don't support transparency get a white background
+    const needsWhiteBg =
+      format.id === "jpeg" || format.id === "bmp" || format.id === "gif";
+    if (needsWhiteBg) {
+      ctx.fillStyle = "#FFFFFF";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    const { dataUrl, filename } = results[0].result;
+    ctx.drawImage(bitmap, 0, 0);
+    bitmap.close();
 
-    // Derive filename from URL
+    // OffscreenCanvas.convertToBlob supports fewer types than toDataURL
+    // Supported: image/png, image/jpeg, image/webp
+    let outputMime = format.mimeType;
+    if (outputMime === "image/gif" || outputMime === "image/bmp") {
+      outputMime = "image/png";
+    }
+
+    const quality =
+      format.id === "jpeg" || format.id === "webp" ? 0.92 : undefined;
+
+    const outputBlob = await canvas.convertToBlob({
+      type: outputMime,
+      quality,
+    });
+
+    // Create a blob URL for downloading
+    const reader = new FileReader();
+    const dataUrl = await new Promise((resolve) => {
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(outputBlob);
+    });
+
+    // Derive filename from source URL
     let baseName = "image";
     try {
       const urlPath = new URL(info.srcUrl).pathname;
@@ -69,80 +94,3 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     console.error("Save As Image Type error:", err);
   }
 });
-
-function convertImageFromBytes(bytes, mimeType, ext, formatId) {
-  return new Promise((resolve) => {
-    const uint8 = new Uint8Array(bytes);
-    const blob = new Blob([uint8]);
-    const blobUrl = URL.createObjectURL(blob);
-
-    const img = new Image();
-    img.onload = () => {
-      URL.revokeObjectURL(blobUrl);
-
-      const canvas = document.createElement("canvas");
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      const ctx = canvas.getContext("2d");
-
-      // Formats that don't support transparency get a white background
-      const needsWhiteBg = formatId === "jpeg" || formatId === "bmp" || formatId === "gif";
-      if (needsWhiteBg) {
-        ctx.fillStyle = "#FFFFFF";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-      }
-
-      ctx.drawImage(img, 0, 0);
-
-      let quality = undefined;
-      if (formatId === "jpeg") quality = 0.92;
-      if (formatId === "webp") quality = 0.92;
-
-      // Chrome doesn't support toDataURL for gif or bmp — fall back to png
-      const outputMime =
-        mimeType === "image/gif" || mimeType === "image/bmp"
-          ? "image/png"
-          : mimeType;
-
-      const dataUrl = canvas.toDataURL(outputMime, quality);
-      resolve({ dataUrl });
-    };
-
-    img.onerror = () => {
-      URL.revokeObjectURL(blobUrl);
-      // Fallback: try createImageBitmap directly from blob
-      createImageBitmap(new Blob([uint8]))
-        .then((bitmap) => {
-          const canvas = document.createElement("canvas");
-          canvas.width = bitmap.width;
-          canvas.height = bitmap.height;
-          const ctx = canvas.getContext("2d");
-
-          const needsWhiteBg = formatId === "jpeg" || formatId === "bmp" || formatId === "gif";
-          if (needsWhiteBg) {
-            ctx.fillStyle = "#FFFFFF";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-          }
-
-          ctx.drawImage(bitmap, 0, 0);
-
-          let quality = undefined;
-          if (formatId === "jpeg") quality = 0.92;
-          if (formatId === "webp") quality = 0.92;
-
-          const outputMime =
-            mimeType === "image/gif" || mimeType === "image/bmp"
-              ? "image/png"
-              : mimeType;
-
-          const dataUrl = canvas.toDataURL(outputMime, quality);
-          resolve({ dataUrl });
-        })
-        .catch((err) => {
-          resolve({ error: err.message });
-        });
-    };
-
-    img.src = blobUrl;
-  });
-}
