@@ -85,8 +85,9 @@ function convertImageFromBytes(bytes, mimeType, ext, formatId) {
       canvas.height = img.naturalHeight;
       const ctx = canvas.getContext("2d");
 
-      // JPEG doesn't support transparency — fill white background
-      if (formatId === "jpeg") {
+      // Formats that don't support transparency get a white background
+      const needsWhiteBg = formatId === "jpeg" || formatId === "bmp" || formatId === "gif";
+      if (needsWhiteBg) {
         ctx.fillStyle = "#FFFFFF";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
@@ -97,7 +98,13 @@ function convertImageFromBytes(bytes, mimeType, ext, formatId) {
       if (formatId === "jpeg") quality = 0.92;
       if (formatId === "webp") quality = 0.92;
 
-      const dataUrl = canvas.toDataURL(mimeType, quality);
+      // Chrome doesn't support toDataURL for gif or bmp — fall back to png
+      const outputMime =
+        mimeType === "image/gif" || mimeType === "image/bmp"
+          ? "image/png"
+          : mimeType;
+
+      const dataUrl = canvas.toDataURL(outputMime, quality);
       resolve({ dataUrl });
     };
 
@@ -111,7 +118,8 @@ function convertImageFromBytes(bytes, mimeType, ext, formatId) {
           canvas.height = bitmap.height;
           const ctx = canvas.getContext("2d");
 
-          if (formatId === "jpeg") {
+          const needsWhiteBg = formatId === "jpeg" || formatId === "bmp" || formatId === "gif";
+          if (needsWhiteBg) {
             ctx.fillStyle = "#FFFFFF";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
@@ -122,7 +130,12 @@ function convertImageFromBytes(bytes, mimeType, ext, formatId) {
           if (formatId === "jpeg") quality = 0.92;
           if (formatId === "webp") quality = 0.92;
 
-          const dataUrl = canvas.toDataURL(mimeType, quality);
+          const outputMime =
+            mimeType === "image/gif" || mimeType === "image/bmp"
+              ? "image/png"
+              : mimeType;
+
+          const dataUrl = canvas.toDataURL(outputMime, quality);
           resolve({ dataUrl });
         })
         .catch((err) => {
