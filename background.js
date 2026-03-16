@@ -11,7 +11,7 @@ const PARENT_ID = "saveAsImageType";
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: PARENT_ID,
-    title: "Save Image As…",
+    title: "Save Image As\u2026",
     contexts: ["image"],
   });
 
@@ -30,10 +30,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (!format) return;
 
   try {
+    // Fetch the image in the background script to avoid CORS issues
+    const response = await fetch(info.srcUrl);
+    const blob = await response.blob();
+    const arrayBuffer = await blob.arrayBuffer();
+    const bytes = Array.from(new Uint8Array(arrayBuffer));
+
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      args: [info.srcUrl, format.mimeType, format.ext, format.id],
-      func: convertImage,
+      args: [bytes, format.mimeType, format.ext, format.id],
+      func: convertImageFromBytes,
     });
 
     if (results?.[0]?.result?.error) {
@@ -43,9 +49,20 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
     const { dataUrl, filename } = results[0].result;
 
+    // Derive filename from URL
+    let baseName = "image";
+    try {
+      const urlPath = new URL(info.srcUrl).pathname;
+      const lastSegment = urlPath.split("/").pop();
+      if (lastSegment) {
+        baseName = lastSegment.replace(/\.[^.]+$/, "") || "image";
+        baseName = baseName.replace(/[^a-zA-Z0-9_\-]/g, "_");
+      }
+    } catch {}
+
     await chrome.downloads.download({
       url: dataUrl,
-      filename: filename,
+      filename: baseName + format.ext,
       saveAs: true,
     });
   } catch (err) {
@@ -53,12 +70,16 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-function convertImage(srcUrl, mimeType, ext, formatId) {
+function convertImageFromBytes(bytes, mimeType, ext, formatId) {
   return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
+    const uint8 = new Uint8Array(bytes);
+    const blob = new Blob([uint8]);
+    const blobUrl = URL.createObjectURL(blob);
 
+    const img = new Image();
     img.onload = () => {
+      URL.revokeObjectURL(blobUrl);
+
       const canvas = document.createElement("canvas");
       canvas.width = img.naturalWidth;
       canvas.height = img.naturalHeight;
@@ -77,27 +98,13 @@ function convertImage(srcUrl, mimeType, ext, formatId) {
       if (formatId === "webp") quality = 0.92;
 
       const dataUrl = canvas.toDataURL(mimeType, quality);
-
-      // Derive filename from URL
-      let baseName = "image";
-      try {
-        const urlPath = new URL(srcUrl).pathname;
-        const lastSegment = urlPath.split("/").pop();
-        if (lastSegment) {
-          baseName = lastSegment.replace(/\.[^.]+$/, "") || "image";
-          // Sanitize
-          baseName = baseName.replace(/[^a-zA-Z0-9_\-]/g, "_");
-        }
-      } catch {}
-
-      resolve({ dataUrl, filename: baseName + ext });
+      resolve({ dataUrl });
     };
 
     img.onerror = () => {
-      // Fallback: try fetching as blob directly
-      fetch(srcUrl)
-        .then((r) => r.blob())
-        .then((blob) => createImageBitmap(blob))
+      URL.revokeObjectURL(blobUrl);
+      // Fallback: try createImageBitmap directly from blob
+      createImageBitmap(new Blob([uint8]))
         .then((bitmap) => {
           const canvas = document.createElement("canvas");
           canvas.width = bitmap.width;
@@ -116,24 +123,13 @@ function convertImage(srcUrl, mimeType, ext, formatId) {
           if (formatId === "webp") quality = 0.92;
 
           const dataUrl = canvas.toDataURL(mimeType, quality);
-
-          let baseName = "image";
-          try {
-            const urlPath = new URL(srcUrl).pathname;
-            const lastSegment = urlPath.split("/").pop();
-            if (lastSegment) {
-              baseName = lastSegment.replace(/\.[^.]+$/, "") || "image";
-              baseName = baseName.replace(/[^a-zA-Z0-9_\-]/g, "_");
-            }
-          } catch {}
-
-          resolve({ dataUrl, filename: baseName + ext });
+          resolve({ dataUrl });
         })
         .catch((err) => {
           resolve({ error: err.message });
         });
     };
 
-    img.src = srcUrl;
+    img.src = blobUrl;
   });
 }

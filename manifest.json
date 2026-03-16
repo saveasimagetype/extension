@@ -3,7 +3,7 @@
   "name": "Save As Image Type",
   "version": "1.0.0",
   "description": "Right-click any image to save it as PNG, JPEG, WebP, BMP, or GIF. Works with all image formats including WebP and AVIF.",
-  "permissions": ["contextMenus", "downloads", "activeTab"],
+  "permissions": ["contextMenus", "downloads", "activeTab", "scripting"],
   "background": {
     "service_worker": "background.js"
   },
