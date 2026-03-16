@@ -67,12 +67,15 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
       quality,
     });
 
-    // Create a blob URL for downloading
-    const reader = new FileReader();
-    const dataUrl = await new Promise((resolve) => {
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(outputBlob);
-    });
+    // Convert blob to data URL (FileReader not available in service workers)
+    const arrayBuffer = await outputBlob.arrayBuffer();
+    const base64 = btoa(
+      new Uint8Array(arrayBuffer).reduce(
+        (data, byte) => data + String.fromCharCode(byte),
+        ""
+      )
+    );
+    const dataUrl = `data:${outputMime};base64,${base64}`;
 
     // Derive filename from source URL
     let baseName = "image";
