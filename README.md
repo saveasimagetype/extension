@@ -9,6 +9,7 @@ A lightweight Chrome/Brave extension that lets you right-click any image and sav
 | PNG | Yes | Lossless |
 | JPEG | No (white fill) | Compressed, 92% quality |
 | WebP | Yes | Modern format, small files |
+| AVIF | Yes | Next-gen format, excellent compression |
 | BMP | No (white fill) | Uncompressed bitmap |
 | GIF | No (white fill) | Classic web format |
 

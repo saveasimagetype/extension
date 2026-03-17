@@ -13,6 +13,7 @@ Save As Image Type adds a simple right-click menu to convert and save any image 
 • PNG — Lossless with transparency
 • JPEG — Compressed, great for photos
 • WebP — Modern format, small file sizes
+• AVIF — Next-gen format, excellent compression
 • BMP — Uncompressed bitmap
 • GIF — Classic web format
 

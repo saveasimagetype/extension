@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Save As Image Type",
   "version": "1.0.0",
-  "description": "Right-click any image to convert and save it as a different format. Supports PNG, JPEG, WebP, BMP, and GIF.",
+  "description": "Right-click any image to convert and save it as a different format. Supports PNG, JPEG, WebP, AVIF, BMP, and GIF.",
   "permissions": ["contextMenus", "downloads", "activeTab", "scripting"],
   "background": {
     "service_worker": "background.js"

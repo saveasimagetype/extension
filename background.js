@@ -2,6 +2,7 @@ const FORMATS = [
   { id: "png", title: "Save as PNG", mimeType: "image/png", ext: ".png" },
   { id: "jpeg", title: "Save as JPEG", mimeType: "image/jpeg", ext: ".jpg" },
   { id: "webp", title: "Save as WebP", mimeType: "image/webp", ext: ".webp" },
+  { id: "avif", title: "Save as AVIF", mimeType: "image/avif", ext: ".avif" },
   { id: "bmp", title: "Save as BMP", mimeType: "image/bmp", ext: ".bmp" },
   { id: "gif", title: "Save as GIF", mimeType: "image/gif", ext: ".gif" },
 ];
@@ -64,14 +65,17 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     ctx.drawImage(bitmap, 0, 0);
     bitmap.close();
 
-    // OffscreenCanvas.convertToBlob supports: image/png, image/jpeg, image/webp
+    // OffscreenCanvas.convertToBlob supports: png, jpeg, webp, avif
+    // BMP and GIF are not supported — fall back to PNG encoding
     let outputMime = format.mimeType;
     if (outputMime === "image/gif" || outputMime === "image/bmp") {
       outputMime = "image/png";
     }
 
     const quality =
-      format.id === "jpeg" || format.id === "webp" ? 0.92 : undefined;
+      format.id === "jpeg" || format.id === "webp" || format.id === "avif"
+        ? 0.92
+        : undefined;
 
     const outputBlob = await canvas.convertToBlob({
       type: outputMime,
